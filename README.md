@@ -10,36 +10,40 @@
 ## Architecture du projet
 
 ```
-projet-moussa-seye/
+recommendation-film/
 ├── data/
 │   ├── raw/                ← données brutes téléchargées (gitignored)
-│   ├── interim/            ← données nettoyées / filtrées en Parquet (gitignored)
+│   ├── interim/            ← données nettoyées / filtrées CSV (gitignored)
 │   └── processed/          ← features prêtes pour la modélisation (gitignored)
+├── interface/              ← application web (dashboard + prédiction)
+│   ├── api/main.py         ← backend FastAPI (port 8000)
+│   ├── src/                ← frontend React 18 + Vite
+│   └── requirements.txt
 ├── models/                 ← modèles sérialisés .dill (gitignored)
 ├── notebooks/
-│   └── 01-eda.ipynb        ← pipeline complet + analyse exploratoire
+│   └── 01-eda.ipynb        ← EDA complète avec MLflow logging
 ├── reports/                ← graphiques générés (gitignored)
 ├── src/
 │   ├── data_loader.py      ← téléchargement + nettoyage (raw → interim)
 │   ├── features.py         ← feature engineering (interim → processed)
-│   ├── trainer.py          ← entraînement 4 modèles + Optuna + MLflow
+│   ├── trainer.py          ← entraînement 5 modèles + Optuna + MLflow
 │   └── recommender.py      ← génération Top-N recommandations
 ├── settings/
 │   └── params.py           ← configuration centralisée (chemins, hyperparamètres)
 ├── tests/
-│   └── test_pipeline.py    ← 25 tests unitaires pytest
+│   └── test_pipeline.py    ← 18 tests unitaires pytest
 ├── requirements.txt
 └── .gitignore
 ```
 
 **Pipeline de données** :
 ```
-download_movielens()  →  data/raw/ml-latest-small/
-process_ratings()     →  data/interim/ratings_filtered.parquet   (filtre MIN_RATINGS=5)
-process_movies()      →  data/interim/movies_clean.parquet       (extraction année, genres)
-build_user_features() →  data/processed/user_features.parquet
-build_item_features() →  data/processed/item_features.parquet
-build_user_item_matrix() → data/processed/user_item_matrix.parquet
+download_movielens()     →  data/raw/ml-latest-small/
+process_ratings()        →  data/interim/ratings_filtered.csv   (filtre MIN_RATINGS=5)
+process_movies()         →  data/interim/movies_clean.csv       (extraction année, genres)
+build_user_features()    →  data/processed/user_features.csv
+build_item_features()    →  data/processed/item_features.csv
+build_user_item_matrix() →  data/processed/user_item_matrix.csv
 ```
 
 ---
@@ -105,6 +109,30 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db
 
 Ouvrir [http://localhost:5000](http://localhost:5000)
 
+### Lancer l'interface web (CinéRec)
+
+L'interface nécessite que les données et les modèles soient déjà générés (étapes 1–3 ci-dessus).
+
+**Terminal 1 — Backend FastAPI** :
+```bash
+conda activate mlops-reco
+pip install fastapi "uvicorn[standard]"   # première fois uniquement
+uvicorn interface.api.main:app --reload --port 8000
+```
+
+**Terminal 2 — Frontend React** :
+```bash
+cd interface
+npm install   # première fois uniquement
+npm run dev
+```
+
+Ouvrir [http://localhost:3000](http://localhost:3000)
+
+L'interface propose deux modes :
+- **Dashboard** — statistiques du dataset, comparaison RMSE des modèles, pipeline MLOps
+- **Prédiction** — entrer des films aimés (avec notes) et obtenir des recommandations en temps réel via 4 méthodes : KNN Similarité, SVD Fold-In, Genre Match, Popularité
+
 ### Lancer les tests
 
 ```bash
@@ -136,5 +164,5 @@ pytest tests/ -v
 | Logging structuré | Loguru (format UTC) |
 | Sérialisation des modèles | Dill (préfixe `YYYYMMDD_`) |
 | Configuration centralisée | `settings/params.py` |
-| Tests automatisés | pytest (25 tests) |
+| Tests automatisés | pytest (18 tests) |
 | Reproductibilité | `SEED = 42`, `requirements.txt` |

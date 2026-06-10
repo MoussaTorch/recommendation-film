@@ -1,0 +1,6 @@
+{
+  "best_model": "SVD",
+  "test_rmse": 0.853,
+  "test_mae": 0.656,
+  "n_models": 1
+}

@@ -1,0 +1,121 @@
+schema: '2.0'
+stages:
+  data:
+    cmd: python src/data_loader.py
+    deps:
+    - path: params.yaml
+      hash: md5
+      md5: cca2e113678eb2981e2f9c24ddb520a1
+      size: 273
+    - path: settings/params.py
+      hash: md5
+      md5: 652130e140716d3bc03f8254d241cce8
+      size: 3751
+    - path: src/data_loader.py
+      hash: md5
+      md5: 0577c0c241166abf3589de3ae3f7cc98
+      size: 8304
+    outs:
+    - path: data/interim/movies_clean.csv
+      hash: md5
+      md5: 023814aa3189375d01a6e92b23a2a922
+      size: 915546
+    - path: data/interim/ratings_filtered.csv
+      hash: md5
+      md5: 8435123cba822e64a5cb44df2f753200
+      size: 2125430
+    - path: data/interim/tags_clean.csv
+      hash: md5
+      md5: d04b71101b3c995855f700182830857a
+      size: 114976
+  features:
+    cmd: python src/features.py
+    deps:
+    - path: data/interim/movies_clean.csv
+      hash: md5
+      md5: 023814aa3189375d01a6e92b23a2a922
+      size: 915546
+    - path: data/interim/ratings_filtered.csv
+      hash: md5
+      md5: 8435123cba822e64a5cb44df2f753200
+      size: 2125430
+    - path: params.yaml
+      hash: md5
+      md5: cca2e113678eb2981e2f9c24ddb520a1
+      size: 273
+    - path: settings/params.py
+      hash: md5
+      md5: 652130e140716d3bc03f8254d241cce8
+      size: 3751
+    - path: src/data_loader.py
+      hash: md5
+      md5: 0577c0c241166abf3589de3ae3f7cc98
+      size: 8304
+    - path: src/features.py
+      hash: md5
+      md5: 2c3295f26e83b490d20769c8ce08bd18
+      size: 7319
+    outs:
+    - path: data/processed/genre_matrix.csv
+      hash: md5
+      md5: e2f69160b021165a91f797da43ecb3b4
+      size: 1399150
+    - path: data/processed/item_features.csv
+      hash: md5
+      md5: deb1cfbf3c53e0dfe9e0f441f40bcadd
+      size: 309442
+    - path: data/processed/user_features.csv
+      hash: md5
+      md5: 1a7778d0d7320bfc8162d885b9dbb0e8
+      size: 17628
+    - path: data/processed/user_item_matrix.csv
+      hash: md5
+      md5: 197f034de6abb7bf4765354a5ec0a4b9
+      size: 2518569
+  train:
+    cmd: python src/trainer.py
+    deps:
+    - path: data/interim/ratings_filtered.csv
+      hash: md5
+      md5: 8435123cba822e64a5cb44df2f753200
+      size: 2125430
+    - path: data/processed/user_item_matrix.csv
+      hash: md5
+      md5: 197f034de6abb7bf4765354a5ec0a4b9
+      size: 2518569
+    - path: params.yaml
+      hash: md5
+      md5: cca2e113678eb2981e2f9c24ddb520a1
+      size: 273
+    - path: settings/params.py
+      hash: md5
+      md5: 652130e140716d3bc03f8254d241cce8
+      size: 3751
+    - path: src/data_loader.py
+      hash: md5
+      md5: 0577c0c241166abf3589de3ae3f7cc98
+      size: 8304
+    - path: src/features.py
+      hash: md5
+      md5: 2c3295f26e83b490d20769c8ce08bd18
+      size: 7319
+    - path: src/trainer.py
+      hash: md5
+      md5: 2c98fe9ad104132b29c14afe77fc00d5
+      size: 11252
+    params:
+      params.yaml:
+        MIN_RATINGS: 5
+        OPTUNA.n_trials: 30
+        SVD.n_epochs: 20
+        SVD.n_factors: 100
+    outs:
+    - path: metrics/train.json
+      hash: md5
+      md5: ea05e14214620eb1d45a5b7ee4fbbbd3
+      size: 85
+    - path: models/
+      hash: md5
+      md5: 717bc2e5db69457bf94a416af440ac53.dir
+      size: 123433356
+      nfiles: 4

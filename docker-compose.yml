@@ -1,0 +1,10 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data/interim:/app/data/interim:ro
+      - ./data/processed:/app/data/processed:ro
+      - ./models:/app/models:ro
+    restart: unless-stopped

@@ -5,6 +5,7 @@ Entraînement des modèles de recommandation avec tracking MLflow.
 Modèles : Baseline (NormalPredictor), KNN User-Based, KNN Item-Based, SVD.
 Optimisation : SVD + Optuna (run_svd_optuna).
 """
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -23,7 +24,8 @@ from surprise.model_selection import cross_validate, train_test_split
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from settings.params import (
     MLFLOW_TRACKING_URI, EXPERIMENT_NAME,
-    MODEL_DIR, MODEL_NAME, MODEL_PARAMS, SEED, TIMEZONE,
+    MODEL_DIR, MODEL_NAME, MODEL_PARAMS, METRICS_DIR, METRICS_FILE,
+    SEED, TIMEZONE,
 )
 
 log_fmt = (
@@ -260,10 +262,35 @@ def run_all_experiments(data: Dataset,
     return df
 
 
+def export_metrics(df: pd.DataFrame) -> Path:
+    """Exporte les métriques du meilleur modèle pour DVC."""
+    METRICS_DIR.mkdir(parents=True, exist_ok=True)
+    best = df.iloc[0]
+    payload = {
+        "best_model": str(best["model"]),
+        "test_rmse" : float(best["test_rmse"]),
+        "test_mae"  : float(best["test_mae"]),
+        "n_models"  : int(len(df)),
+    }
+    METRICS_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    logger.info(f"Métriques exportées : {METRICS_FILE}")
+    return METRICS_FILE
+
+
 if __name__ == "__main__":
+    import argparse
+
     from features import build_surprise_dataset
     from data_loader import load_ratings
 
+    parser = argparse.ArgumentParser(description="Entraînement des modèles de recommandation")
+    parser.add_argument(
+        "--with-optuna", action="store_true",
+        help="Activer l'optimisation Optuna (30 trials, plus long)",
+    )
+    args = parser.parse_args()
+
     ratings = load_ratings()
     dataset = build_surprise_dataset(ratings)
-    df_results = run_all_experiments(dataset, with_optuna=True)
+    df_results = run_all_experiments(dataset, with_optuna=args.with_optuna)
+    export_metrics(df_results)

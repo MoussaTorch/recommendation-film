@@ -1,0 +1,49 @@
+# Pipeline MLOps reproductible — lancer avec : dvc repro
+stages:
+  data:
+    cmd: python src/data_loader.py
+    deps:
+      - src/data_loader.py
+      - settings/params.py
+      - params.yaml
+    outs:
+      - data/interim/ratings_filtered.csv
+      - data/interim/movies_clean.csv
+      - data/interim/tags_clean.csv
+
+  features:
+    cmd: python src/features.py
+    deps:
+      - src/features.py
+      - src/data_loader.py
+      - settings/params.py
+      - params.yaml
+      - data/interim/ratings_filtered.csv
+      - data/interim/movies_clean.csv
+    outs:
+      - data/processed/user_item_matrix.csv
+      - data/processed/user_features.csv
+      - data/processed/item_features.csv
+      - data/processed/genre_matrix.csv
+
+  train:
+    cmd: python src/trainer.py
+    deps:
+      - src/trainer.py
+      - src/features.py
+      - src/data_loader.py
+      - settings/params.py
+      - params.yaml
+      - data/interim/ratings_filtered.csv
+      - data/processed/user_item_matrix.csv
+    outs:
+      - models/
+    metrics:
+      - metrics/train.json:
+          cache: false
+    params:
+      - params.yaml:
+          - MIN_RATINGS
+          - SVD.n_factors
+          - SVD.n_epochs
+          - OPTUNA.n_trials

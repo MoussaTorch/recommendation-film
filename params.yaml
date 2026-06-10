@@ -1,0 +1,21 @@
+# Hyperparamètres versionnés par DVC (miroir de settings/params.py)
+MIN_RATINGS: 5
+TEST_SIZE: 0.20
+N_SPLITS: 5
+SEED: 42
+WITH_OPTUNA: false
+
+SVD:
+  n_factors: 100
+  n_epochs: 20
+  lr_all: 0.005
+  reg_all: 0.02
+
+KNN_USER:
+  k: 40
+
+KNN_ITEM:
+  k: 40
+
+OPTUNA:
+  n_trials: 30

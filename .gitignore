@@ -25,6 +25,14 @@ env/
 .idea/
 *.DS_Store
 
+# ── Frontend ──────────────────────────────────────────────────────────────────
+interface/node_modules/
+interface/dist/
+
+# ── DVC ───────────────────────────────────────────────────────────────────────
+.dvc/cache/
+.dvc/tmp/
+
 # ── Données (architecture raw/interim/processed) ─────────────────────────────
 # Reproductibles via : python src/data_loader.py && python src/features.py
 data/raw/
@@ -53,3 +61,4 @@ logs/
 # ── Agent Claude  ────────────────────────────────────
 CLAUDE.md
 .claude/
+/models

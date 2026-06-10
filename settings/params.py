@@ -10,12 +10,14 @@ DATA_DIR_RAW   = DATA_DIR / "raw"        # données brutes téléchargées (immu
 DATA_DIR_INTERIM   = DATA_DIR / "interim"    # données nettoyées / filtrées
 DATA_DIR_PROCESSED = DATA_DIR / "processed"  # features prêtes pour la modélisation
 
-MODEL_DIR   = HOME_DIR / "models"
-REPORT_DIR  = HOME_DIR / "reports"
+MODEL_DIR    = HOME_DIR / "models"
+METRICS_DIR  = HOME_DIR / "metrics"
+REPORT_DIR   = HOME_DIR / "reports"
+METRICS_FILE = METRICS_DIR / "train.json"
 SRC_DIR     = HOME_DIR / "src"
 NOTEBOOK_DIR = HOME_DIR / "notebooks"
 
-for _d in [DATA_DIR_RAW, DATA_DIR_INTERIM, DATA_DIR_PROCESSED, MODEL_DIR, REPORT_DIR]:
+for _d in [DATA_DIR_RAW, DATA_DIR_INTERIM, DATA_DIR_PROCESSED, MODEL_DIR, METRICS_DIR, REPORT_DIR]:
     _d.mkdir(parents=True, exist_ok=True)
 
 # ── Dataset MovieLens ─────────────────────────────────────────────────────────

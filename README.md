@@ -1,7 +1,6 @@
 # Système de Recommandation de Films — MLOps
 
-**Auteur** : Moussa Seye — EPT DIC3  
-**Encadrante** : Mme Mously Diaw  
+**Auteur** : Moussa Seye  
 **Dataset** : [MovieLens ml-latest-small](https://grouplens.org/datasets/movielens/) — 100 836 notes, 610 utilisateurs, 9 742 films  
 **Tracking** : MLflow (backend SQLite)
 

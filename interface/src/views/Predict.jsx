@@ -368,11 +368,18 @@ function ProfileFilmCard({ film, delay = 0 }) {
       <div className="film-footer">
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <div style={{
-            width: 36, height: 36, borderRadius: '50%',
-            background: `conic-gradient(var(--cyan) ${pct * 3.6}deg, rgba(255,255,255,0.06) 0deg)`,
+            width: 40, height: 40, borderRadius: '50%',
+            background: `conic-gradient(var(--cyan) ${pct * 3.6}deg, rgba(255,255,255,0.08) 0deg)`,
             display: 'grid', placeItems: 'center',
-            fontSize: '0.62rem', fontWeight: 700, color: 'var(--cyan)',
-          }} aria-label={`Score ${pct}%`}>{pct}%</div>
+            flexShrink: 0,
+          }} aria-label={`Score ${pct}%`}>
+            <div style={{
+              width: 28, height: 28, borderRadius: '50%',
+              background: 'var(--bg-2)',
+              display: 'grid', placeItems: 'center',
+              fontSize: '0.58rem', fontWeight: 700, color: 'var(--cyan)',
+            }}>{pct}%</div>
+          </div>
         </div>
         <span className="rating-lbl">score</span>
       </div>

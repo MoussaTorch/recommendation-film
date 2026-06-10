@@ -555,7 +555,7 @@ body {
   line-height: 1.35;
   color: var(--text-1);
 }
-.film-year  { font-size: 0.72rem; color: var(--text-3); margin-top: -6px; }
+.film-year  { font-size: 0.72rem; color: var(--text-3); margin-top: 3px; }
 .film-genres { display: flex; gap: 4px; flex-wrap: wrap; }
 .genre-chip {
   font-size: 0.62rem; font-weight: 600; letter-spacing: 0.04em;

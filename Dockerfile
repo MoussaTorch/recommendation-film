@@ -9,12 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt interface/requirements.txt ./
+COPY requirements.txt ./
 RUN pip install --no-cache-dir numpy==1.26.4 cython \
     && pip install --no-cache-dir scikit-surprise==1.1.3 --no-build-isolation \
     && pip install --no-cache-dir "setuptools<70" \
-    && pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir -r interface/requirements.txt
+    && pip install --no-cache-dir -r requirements.txt
 
 COPY settings/ settings/
 COPY src/ src/

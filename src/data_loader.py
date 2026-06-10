@@ -5,9 +5,9 @@ Pipeline de données : téléchargement (→ raw), nettoyage/filtrage (→ inter
 
 Étapes :
   1. download_movielens()  : télécharge + extrait dans data/raw/
-  2. process_ratings()     : filtre MIN_RATINGS, sauvegarde data/interim/
-  3. process_movies()      : nettoie titres/genres,  sauvegarde data/interim/
-  4. load_interim_*()      : charge depuis interim (usage courant dans le code)
+  2. process_ratings()     : filtre MIN_RATINGS, sauvegarde data/interim/ (.csv)
+  3. process_movies()      : nettoie titres/genres,  sauvegarde data/interim/ (.csv)
+  4. load_*()              : charge depuis interim (usage courant dans le code)
 """
 import sys
 import zipfile
@@ -55,15 +55,15 @@ def download_movielens(force: bool = False) -> None:
 def process_ratings(min_ratings: int = MODEL_PARAMS["MIN_RATINGS"],
                     force: bool = False) -> pd.DataFrame:
     """
-    Lit ratings.csv (raw), applique le filtre MIN_RATINGS, sauvegarde
-    ratings_filtered.parquet dans data/interim/.
+    Lit ratings.csv (raw), applique le filtre MIN_RATINGS,
+    sauvegarde ratings_filtered.csv dans data/interim/.
 
     Filtre double : on retire les utilisateurs ET les films ayant moins
     de `min_ratings` interactions (cold-start mitigation).
     """
     if RATINGS_INTERIM.exists() and not force:
         logger.info(f"Interim ratings déjà présent : {RATINGS_INTERIM}")
-        return pd.read_parquet(RATINGS_INTERIM)
+        return pd.read_csv(RATINGS_INTERIM)
 
     logger.info(f"Chargement raw ratings : {RATINGS_FILE}")
     df = pd.read_csv(RATINGS_FILE)
@@ -93,7 +93,7 @@ def process_ratings(min_ratings: int = MODEL_PARAMS["MIN_RATINGS"],
         f"{df['movieid'].nunique():,} films"
     )
 
-    df.to_parquet(RATINGS_INTERIM, index=False)
+    df.to_csv(RATINGS_INTERIM, index=False)
     logger.success(f"Sauvegardé : {RATINGS_INTERIM}")
     return df
 
@@ -102,14 +102,16 @@ def process_ratings(min_ratings: int = MODEL_PARAMS["MIN_RATINGS"],
 def process_movies(force: bool = False) -> pd.DataFrame:
     """
     Lit movies.csv (raw), extrait l'année et nettoie le titre,
-    sauvegarde movies_clean.parquet dans data/interim/.
+    sauvegarde movies_clean.csv dans data/interim/.
+
+    genres_list est sauvegardé en string pipe-separated (ex: "Action|Comedy")
+    et reconverti en liste Python au chargement.
     """
     if MOVIES_INTERIM.exists() and not force:
         logger.info(f"Interim movies déjà présent : {MOVIES_INTERIM}")
-        df = pd.read_parquet(MOVIES_INTERIM)
-        # pyarrow sérialise les listes en type ArrowExtension — on convertit en list Python
-        if "genres_list" in df.columns:
-            df["genres_list"] = df["genres_list"].apply(list)
+        df = pd.read_csv(MOVIES_INTERIM)
+        # Reconvertit la colonne pipe-separated en liste Python
+        df["genres_list"] = df["genres_list"].str.split("|")
         return df
 
     logger.info(f"Chargement raw movies : {MOVIES_FILE}")
@@ -124,21 +126,24 @@ def process_movies(force: bool = False) -> pd.DataFrame:
 
     logger.info(f"  {len(df):,} films | années : {df['year'].min():.0f}–{df['year'].max():.0f}")
 
-    df.to_parquet(MOVIES_INTERIM, index=False)
+    # Sauvegarder genres_list en string pipe-separated pour la compatibilité CSV
+    df_save = df.copy()
+    df_save["genres_list"] = df_save["genres_list"].apply("|".join)
+    df_save.to_csv(MOVIES_INTERIM, index=False)
     logger.success(f"Sauvegardé : {MOVIES_INTERIM}")
     return df
 
 
 def process_tags(force: bool = False) -> pd.DataFrame:
-    """Lit tags.csv (raw) et sauvegarde tags_clean.parquet dans data/interim/."""
+    """Lit tags.csv (raw) et sauvegarde tags_clean.csv dans data/interim/."""
     if TAGS_INTERIM.exists() and not force:
         logger.info(f"Interim tags déjà présent : {TAGS_INTERIM}")
-        return pd.read_parquet(TAGS_INTERIM)
+        return pd.read_csv(TAGS_INTERIM)
 
     logger.info(f"Chargement raw tags : {TAGS_FILE}")
     df = pd.read_csv(TAGS_FILE)
     df.columns = df.columns.str.lower()
-    df.to_parquet(TAGS_INTERIM, index=False)
+    df.to_csv(TAGS_INTERIM, index=False)
     logger.success(f"Sauvegardé : {TAGS_INTERIM}")
     return df
 
@@ -169,10 +174,10 @@ def load_all() -> dict[str, pd.DataFrame]:
 # ── 5. Métriques descriptives ─────────────────────────────────────────────────
 def dataset_summary(ratings: pd.DataFrame, movies: pd.DataFrame) -> dict:
     """Retourne un dict de métriques descriptives (loggable via MLflow)."""
-    n_ratings  = len(ratings)
-    n_users    = ratings["userid"].nunique()
-    n_items    = ratings["movieid"].nunique()
-    density    = n_ratings / (n_users * n_items)
+    n_ratings = len(ratings)
+    n_users   = ratings["userid"].nunique()
+    n_items   = ratings["movieid"].nunique()
+    density   = n_ratings / (n_users * n_items)
 
     summary = {
         "n_ratings"  : n_ratings,
@@ -189,10 +194,7 @@ def dataset_summary(ratings: pd.DataFrame, movies: pd.DataFrame) -> dict:
 
 # ── Pipeline complet ──────────────────────────────────────────────────────────
 def run_data_pipeline(force: bool = False) -> dict[str, pd.DataFrame]:
-    """
-    Lance le pipeline complet :
-      raw (téléchargement) → interim (nettoyage/filtrage)
-    """
+    """Lance le pipeline complet : raw (téléchargement) → interim (nettoyage)."""
     download_movielens(force=force)
     data = {
         "ratings": process_ratings(force=force),

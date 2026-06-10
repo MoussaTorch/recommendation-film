@@ -3,12 +3,12 @@ features.py
 -----------
 Feature engineering : interim → processed.
 
-Construit et persiste :
-  - Dataset Surprise (pour l'entraînement)
-  - Matrice user-item  → processed/user_item_matrix.parquet
-  - User features      → processed/user_features.parquet
-  - Item features      → processed/item_features.parquet
-  - Genre matrix       → processed/genre_matrix.parquet
+Construit et persiste (CSV) :
+  - Dataset Surprise       (pour l'entraînement, non persisté)
+  - Matrice user-item  →   processed/user_item_matrix.csv
+  - User features      →   processed/user_features.csv
+  - Item features      →   processed/item_features.csv
+  - Genre matrix       →   processed/genre_matrix.csv
 """
 import sys
 from pathlib import Path
@@ -51,17 +51,20 @@ def build_user_item_matrix(ratings: pd.DataFrame,
     """
     Pivot ratings → matrice user × item (sparse).
     NaN = film non noté par l'utilisateur.
+    L'index (userid) est conservé dans la colonne 'userid' du CSV.
     """
     if save and USER_ITEM_MATRIX_FILE.exists():
         logger.info(f"Matrice user-item déjà présente : {USER_ITEM_MATRIX_FILE}")
-        return pd.read_parquet(USER_ITEM_MATRIX_FILE)
+        df = pd.read_csv(USER_ITEM_MATRIX_FILE, index_col=0)
+        df.columns = df.columns.astype(int)  # movieId en int
+        return df
 
     matrix = ratings.pivot_table(index="userid", columns="movieid", values="rating")
     sparsity = 1 - matrix.notna().sum().sum() / matrix.size
     logger.info(f"Matrice user-item : {matrix.shape} — sparsité {sparsity:.2%}")
 
     if save:
-        matrix.to_parquet(USER_ITEM_MATRIX_FILE)
+        matrix.to_csv(USER_ITEM_MATRIX_FILE)
         logger.success(f"Sauvegardé : {USER_ITEM_MATRIX_FILE}")
     return matrix
 
@@ -71,7 +74,7 @@ def build_user_features(ratings: pd.DataFrame, save: bool = True) -> pd.DataFram
     """Statistiques agrégées par utilisateur."""
     if save and USER_FEATURES_FILE.exists():
         logger.info(f"User features déjà présentes : {USER_FEATURES_FILE}")
-        return pd.read_parquet(USER_FEATURES_FILE)
+        return pd.read_csv(USER_FEATURES_FILE)
 
     uf = (
         ratings.groupby("userid")["rating"]
@@ -88,7 +91,7 @@ def build_user_features(ratings: pd.DataFrame, save: bool = True) -> pd.DataFram
     logger.info(f"User features : {uf.shape}")
 
     if save:
-        uf.to_parquet(USER_FEATURES_FILE, index=False)
+        uf.to_csv(USER_FEATURES_FILE, index=False)
         logger.success(f"Sauvegardé : {USER_FEATURES_FILE}")
     return uf
 
@@ -99,7 +102,9 @@ def build_item_features(ratings: pd.DataFrame, movies: pd.DataFrame,
     """Statistiques par film + métadonnées (titre, année, genres)."""
     if save and ITEM_FEATURES_FILE.exists():
         logger.info(f"Item features déjà présentes : {ITEM_FEATURES_FILE}")
-        return pd.read_parquet(ITEM_FEATURES_FILE)
+        df = pd.read_csv(ITEM_FEATURES_FILE)
+        df["genres_list"] = df["genres_list"].str.split("|")
+        return df
 
     itf = (
         ratings.groupby("movieid")["rating"]
@@ -119,12 +124,11 @@ def build_item_features(ratings: pd.DataFrame, movies: pd.DataFrame,
     logger.info(f"Item features : {itf.shape}")
 
     if save:
-        # genres_list est une liste Python, on la sérialise en string pour parquet
         itf_save = itf.copy()
         itf_save["genres_list"] = itf_save["genres_list"].apply(
             lambda x: "|".join(x) if isinstance(x, list) else x
         )
-        itf_save.to_parquet(ITEM_FEATURES_FILE, index=False)
+        itf_save.to_csv(ITEM_FEATURES_FILE, index=False)
         logger.success(f"Sauvegardé : {ITEM_FEATURES_FILE}")
     return itf
 
@@ -134,7 +138,7 @@ def encode_genres(movies: pd.DataFrame, save: bool = True) -> pd.DataFrame:
     """One-hot encoding des genres pour chaque film."""
     if save and GENRE_MATRIX_FILE.exists():
         logger.info(f"Genre matrix déjà présente : {GENRE_MATRIX_FILE}")
-        return pd.read_parquet(GENRE_MATRIX_FILE)
+        return pd.read_csv(GENRE_MATRIX_FILE)
 
     genres_dummies = movies["genres_list"].explode()
     genres_dummies = pd.get_dummies(genres_dummies).groupby(level=0).max()
@@ -142,7 +146,7 @@ def encode_genres(movies: pd.DataFrame, save: bool = True) -> pd.DataFrame:
     logger.info(f"Genre matrix : {result.shape} — {genres_dummies.shape[1]} genres")
 
     if save:
-        result.to_parquet(GENRE_MATRIX_FILE, index=False)
+        result.to_csv(GENRE_MATRIX_FILE, index=False)
         logger.success(f"Sauvegardé : {GENRE_MATRIX_FILE}")
     return result
 
@@ -151,10 +155,7 @@ def encode_genres(movies: pd.DataFrame, save: bool = True) -> pd.DataFrame:
 def run_feature_pipeline(ratings: pd.DataFrame,
                          movies: pd.DataFrame,
                          force: bool = False) -> dict:
-    """
-    Lance le pipeline features complet (interim → processed).
-    Retourne un dict avec tous les artefacts construits.
-    """
+    """Lance le pipeline features complet (interim → processed)."""
     if force:
         for f in [USER_ITEM_MATRIX_FILE, USER_FEATURES_FILE,
                   ITEM_FEATURES_FILE, GENRE_MATRIX_FILE]:

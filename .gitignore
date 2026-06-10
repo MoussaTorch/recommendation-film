@@ -26,27 +26,22 @@ env/
 *.DS_Store
 
 # ── Données (architecture raw/interim/processed) ─────────────────────────────
-# raw : données téléchargées (volumineuses, reproduisibles via data_loader.py)
+# Reproductibles via : python src/data_loader.py && python src/features.py
 data/raw/
-# interim : fichiers parquet générés (reproduisibles via data_loader.py)
 data/interim/
-# processed : features calculées (reproduisibles via features.py)
 data/processed/
-# Ancien emplacement (legacy)
-data/input/ml-latest-small.zip
-data/input/ml-latest-small/
 
 # ── Modèles sérialisés ────────────────────────────────────────────────────────
 models/*.dill
 models/*.pkl
 models/*.joblib
 
-# ── MLflow artifacts ──────────────────────────────────────────────────────────
+# ── MLflow (base SQLite générée à l'exécution) ────────────────────────────────
 mlruns/
 mlflow.db
 mlflow.db-journal
 
-# ── Rapport (usage personnel) ─────────────────────────────────────────────────
+# ── Rapport & graphiques ──────────────────────────────────────────────────────
 rapport_*.md
 rapport_*.docx
 rapport_*.pdf

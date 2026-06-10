@@ -30,15 +30,15 @@ TAGS_FILE    = MOVIELENS_DIR / "tags.csv"
 LINKS_FILE   = MOVIELENS_DIR / "links.csv"
 
 # Fichiers intermédiaires (interim) — nettoyés, filtrés
-RATINGS_INTERIM = DATA_DIR_INTERIM / "ratings_filtered.parquet"
-MOVIES_INTERIM  = DATA_DIR_INTERIM / "movies_clean.parquet"
-TAGS_INTERIM    = DATA_DIR_INTERIM / "tags_clean.parquet"
+RATINGS_INTERIM = DATA_DIR_INTERIM / "ratings_filtered.csv"
+MOVIES_INTERIM  = DATA_DIR_INTERIM / "movies_clean.csv"
+TAGS_INTERIM    = DATA_DIR_INTERIM / "tags_clean.csv"
 
 # Fichiers finaux (processed) — features prêtes pour la modélisation
-USER_ITEM_MATRIX_FILE = DATA_DIR_PROCESSED / "user_item_matrix.parquet"
-USER_FEATURES_FILE    = DATA_DIR_PROCESSED / "user_features.parquet"
-ITEM_FEATURES_FILE    = DATA_DIR_PROCESSED / "item_features.parquet"
-GENRE_MATRIX_FILE     = DATA_DIR_PROCESSED / "genre_matrix.parquet"
+USER_ITEM_MATRIX_FILE = DATA_DIR_PROCESSED / "user_item_matrix.csv"
+USER_FEATURES_FILE    = DATA_DIR_PROCESSED / "user_features.csv"
+ITEM_FEATURES_FILE    = DATA_DIR_PROCESSED / "item_features.csv"
+GENRE_MATRIX_FILE     = DATA_DIR_PROCESSED / "genre_matrix.csv"
 
 # ── MLflow ────────────────────────────────────────────────────────────────────
 MLFLOW_TRACKING_URI = f"sqlite:///{HOME_DIR / 'mlflow.db'}"

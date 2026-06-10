@@ -178,8 +178,8 @@ def run_svd_optuna(data: Dataset) -> dict:
             lr_all=lr_all, reg_all=reg_all,
             random_state=SEED,
         )
-        _, test_m = train_final_model(algo, data)
-        return test_m["test_rmse"]
+        cv_m = evaluate_model(algo, data, n_splits=3)
+        return cv_m["cv_rmse_mean"]
 
     mlflc = MLflowCallback(
         tracking_uri=MLFLOW_TRACKING_URI,

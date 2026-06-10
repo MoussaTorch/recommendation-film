@@ -51,5 +51,5 @@ reports/
 *.log
 logs/
 
-# ── Agent Claude (usage local uniquement) ────────────────────────────────────
+# ── Agent Claude  ────────────────────────────────────
 CLAUDE.md

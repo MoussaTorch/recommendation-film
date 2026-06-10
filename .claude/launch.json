@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cinec-react",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "./interface/node_modules/.bin/vite",
+        "--root", "./interface",
+        "--port", "3000"
+      ],
+      "port": 3000,
+      "autoPort": false
+    }
+  ]
+}

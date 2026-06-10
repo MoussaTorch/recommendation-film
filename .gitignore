@@ -42,7 +42,6 @@ mlflow.db
 mlflow.db-journal
 
 # ── Rapport & graphiques ──────────────────────────────────────────────────────
-rapport_*.md
 rapport_*.docx
 rapport_*.pdf
 reports/

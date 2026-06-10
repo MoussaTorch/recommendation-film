@@ -5,6 +5,8 @@
 **Dataset** : [MovieLens ml-latest-small](https://grouplens.org/datasets/movielens/) — 100 836 notes, 610 utilisateurs, 9 742 films  
 **Tracking** : MLflow (backend SQLite)
 
+Rapport : Pour une meilleure compréhension du projet, lire le rapport_projet.md
+
 ---
 
 ## Architecture du projet
@@ -37,6 +39,7 @@ recommendation-film/
 ```
 
 **Pipeline de données** :
+
 ```
 download_movielens()     →  data/raw/ml-latest-small/
 process_ratings()        →  data/interim/ratings_filtered.csv   (filtre MIN_RATINGS=5)
@@ -79,6 +82,7 @@ jupyter notebook notebooks/01-eda.ipynb
 ```
 
 Le notebook couvre de bout en bout :
+
 1. Téléchargement du dataset (`data/raw/`)
 2. Nettoyage et filtrage (`data/interim/`)
 3. Feature engineering (`data/processed/`)
@@ -114,6 +118,7 @@ Ouvrir [http://localhost:5000](http://localhost:5000)
 L'interface nécessite que les données et les modèles soient déjà générés (étapes 1–3 ci-dessus).
 
 **Terminal 1 — Backend FastAPI** :
+
 ```bash
 conda activate mlops-reco
 pip install fastapi "uvicorn[standard]"   # première fois uniquement
@@ -121,6 +126,7 @@ uvicorn interface.api.main:app --reload --port 8000
 ```
 
 **Terminal 2 — Frontend React** :
+
 ```bash
 cd interface
 npm install   # première fois uniquement
@@ -130,6 +136,7 @@ npm run dev
 Ouvrir [http://localhost:3000](http://localhost:3000)
 
 L'interface propose deux modes :
+
 - **Dashboard** — statistiques du dataset, comparaison RMSE des modèles, pipeline MLOps
 - **Prédiction** — entrer des films aimés (avec notes) et obtenir des recommandations en temps réel via 4 méthodes : KNN Similarité, SVD Fold-In, Genre Match, Popularité
 
@@ -143,26 +150,31 @@ pytest tests/ -v
 
 ## Modèles
 
-| Modèle | Description |
-|---|---|
-| `NormalPredictor` | Baseline — prédiction aléatoire selon la distribution des notes |
-| `KNNBasic` (user-based) | Collaborative filtering — similarité cosinus entre utilisateurs |
-| `KNNBasic` (item-based) | Collaborative filtering — similarité cosinus entre films |
-| `SVD` | Matrix Factorization — modèle principal |
-| `SVD + Optuna` | SVD avec optimisation automatique des hyperparamètres (30 trials) |
+
+| Modèle                  | Description                                                       |
+| ----------------------- | ----------------------------------------------------------------- |
+| `NormalPredictor`       | Baseline — prédiction aléatoire selon la distribution des notes   |
+| `KNNBasic` (user-based) | Collaborative filtering — similarité cosinus entre utilisateurs   |
+| `KNNBasic` (item-based) | Collaborative filtering — similarité cosinus entre films          |
+| `SVD`                   | Matrix Factorization — modèle principal                           |
+| `SVD + Optuna`          | SVD avec optimisation automatique des hyperparamètres (30 trials) |
+
 
 ---
 
 ## Pratiques MLOps appliquées
 
-| Pratique | Outil / Méthode |
-|---|---|
-| Tracking des expériences | MLflow (backend SQLite) |
-| Versioning des paramètres et métriques | MLflow Params + Metrics |
-| Optimisation des hyperparamètres | Optuna + MLflowCallback |
-| Architecture data | `raw/` → `interim/` → `processed/` |
-| Logging structuré | Loguru (format UTC) |
-| Sérialisation des modèles | Dill (préfixe `YYYYMMDD_`) |
-| Configuration centralisée | `settings/params.py` |
-| Tests automatisés | pytest (18 tests) |
-| Reproductibilité | `SEED = 42`, `requirements.txt` |
+
+| Pratique                               | Outil / Méthode                    |
+| -------------------------------------- | ---------------------------------- |
+| Tracking des expériences               | MLflow (backend SQLite)            |
+| Versioning des paramètres et métriques | MLflow Params + Metrics            |
+| Optimisation des hyperparamètres       | Optuna + MLflowCallback            |
+| Architecture data                      | `raw/` → `interim/` → `processed/` |
+| Logging structuré                      | Loguru (format UTC)                |
+| Sérialisation des modèles              | Dill (préfixe `YYYYMMDD_`)         |
+| Configuration centralisée              | `settings/params.py`               |
+| Tests automatisés                      | pytest (18 tests)                  |
+| Reproductibilité                       | `SEED = 42`, `requirements.txt`    |
+
+

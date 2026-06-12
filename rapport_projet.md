@@ -1,7 +1,6 @@
 # Rapport de Projet MLOps — Système de Recommandation de Films
 
 **Auteur** : Moussa Seye — EPT DIC3
-**Encadrante** : Mme Mously Diaw
 **Dataset** : MovieLens ml-latest-small — GroupLens Research
 **Date** : Juin 2026
 
